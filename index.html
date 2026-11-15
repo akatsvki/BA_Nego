@@ -959,6 +959,12 @@
           </div>
         </div>
 
+        <div class="section-divider">Tempat Pelaksanaan Berita Acara</div>
+        <div class="form-group" style="margin-bottom:12px;">
+          <label for="Alamat_BA">Alamat Berita Acara Pembuktian Kualifikasi</label>
+          <textarea id="Alamat_BA" name="Alamat_BA" rows="3" placeholder="Masukkan tempat dan alamat pelaksanaan berita acara">UPTD Metrologi Legal, Dinas Perindustrian dan Perdagangan Kab. Sidoarjo. Jl. Lingkar Timur, Kel. Gebang Kec. Sidoarjo Kab. Sidoarjo.</textarea>
+        </div>
+
         <div class="section-divider">Nomor Masing-Masing Berita Acara &amp; Laporan</div>
         <div class="grid-2">
           <div class="form-group">
@@ -1109,9 +1115,13 @@
             <input type="text" id="NIB" name="NIB" />
           </div>
           <div class="form-group">
-            <label for="Berlaku_NIB">NIB Berlaku s/d <span class="tag-hint">&lt;&lt;Berlaku_NIB&gt;&gt;</span></label>
-            <div class="date-combo">
-              <input type="text" id="Berlaku_NIB" name="Berlaku_NIB" class="indo-date-input" placeholder="Selama menjalankan usaha / dd/mm/yyyy" />
+            <label for="mode_Berlaku_NIB">NIB Berlaku s/d <span class="tag-hint">&lt;&lt;Berlaku_NIB&gt;&gt;</span></label>
+            <select id="mode_Berlaku_NIB" name="mode_Berlaku_NIB" onchange="handleNIBBerlakuModeChange()">
+              <option value="seumur_hidup" selected>Seumur Hidup</option>
+              <option value="tanggal">Pilih Tanggal</option>
+            </select>
+            <div class="date-combo" id="nibDateInputWrap" style="display:none; margin-top:6px;">
+              <input type="text" id="Berlaku_NIB" name="Berlaku_NIB" class="indo-date-input" value="Seumur Hidup" placeholder="dd/mm/yyyy" aria-label="Tanggal NIB Berlaku s/d" />
               <button type="button" class="cal-trigger-btn" title="Pilih dari Kalender" aria-label="Pilih dari Kalender" onclick="openIndoCalendar(this, 'Berlaku_NIB', false)">📅</button>
             </div>
           </div>
@@ -2218,15 +2228,43 @@
       metodeEl.value = pilihan.includes(kandidat) ? kandidat : 'Pengadaan Langsung';
     }
 
+    // NIB: pilihan "Seumur Hidup" sebagai default atau tanggal kalender.
+    // Nilai yang digunakan di PDF, Word, pratinjau, dan JSON selalu berasal dari Berlaku_NIB.
+    // Mode disimpan terpisah agar input tanggal yang belum diisi tidak berubah saat halaman dimuat ulang.
+    function syncNIBBerlakuUI(inferModeForLegacyData = false) {
+      const modeEl = document.getElementById('mode_Berlaku_NIB');
+      const valueEl = document.getElementById('Berlaku_NIB');
+      const dateWrap = document.getElementById('nibDateInputWrap');
+      if (!modeEl || !valueEl || !dateWrap) return;
+      const current = valueEl.value.trim();
+      if (inferModeForLegacyData && current && current.toLowerCase() !== 'seumur hidup') {
+        // Saat memuat JSON/localStorage versi 11, tanggal (atau teks lama) tetap dipertahankan.
+        modeEl.value = 'tanggal';
+      }
+      const useDate = modeEl.value === 'tanggal';
+      dateWrap.style.display = useDate ? 'flex' : 'none';
+      if (!useDate) {
+        valueEl.value = 'Seumur Hidup';
+      } else if (current.toLowerCase() === 'seumur hidup') {
+        valueEl.value = '';
+      }
+    }
+
+    function handleNIBBerlakuModeChange() {
+      syncNIBBerlakuUI();
+      saveData();
+      if (currentStep === 5) renderPreview();
+    }
+
     const SCALAR_FIELDS = [
       'pickerTanggalBA_text', 'Tanggal', 'Hari', 'Tanggal_Teks', 'Bulan', 'Tahun_Teks', 'Tahun',
-      'No_Permohonan', 'Tanggal_permohonan', 'Tanggal_Mulai', 'Tanggal_Selesai',
+      'No_Permohonan', 'Tanggal_permohonan', 'Tanggal_Mulai', 'Tanggal_Selesai', 'Alamat_BA',
       'Nomor_Klarifikasi', 'Nomor_Kualifikasi', 'Nomor_Negosiasi', 'Nomor_Laporan',
       'Nama_Pejabat_Pengadaan', 'NIP_Pejabat_Pengadaan',
       'Kategori_Pengadaan', 'Metode_Pengadaan', 'Pekerjaan', 'Sumber_Dana',
       'Pagu', 'HPS', 'Harga_Penawaran', 'Harga_Terkoreksi', 'Harga_Nego',
       'Nama_Perusahaan', 'Nama_Direktur', 'Kuasa_Direktur', 'NPWP', 'Alamat',
-      'NIB', 'Berlaku_NIB', 'No_SBU', 'Berlaku_SBU', 'Kualifikasi', 'SubKlasifikasi',
+      'NIB', 'mode_Berlaku_NIB', 'Berlaku_NIB', 'No_SBU', 'Berlaku_SBU', 'Kualifikasi', 'SubKlasifikasi',
       'No_Akta_Pendirian', 'Tanggal_Akta_Pendirian', 'Notaris_Akta_Pendirian',
       'No_Akta_Perubahan', 'Tanggal_Akta_Perubahan', 'Notaris_Akta_Perubahan',
       'History_Paket', 'Pemberi_Kerja', 'No_Kontrak', 'Tanggal_Kontrak',
@@ -2248,6 +2286,7 @@
       initSubklasifikasiOptions();
       syncMetodePengadaan();
       loadSavedData();
+      syncNIBBerlakuUI(true);
       finishSubklasifikasiInput();
       updateNPWPBadge();
       renderPersonelForm();
@@ -2886,6 +2925,7 @@
       toggleExpSection(7);
       updateNPWPBadge();
       syncSubklasifikasiUI();
+      syncNIBBerlakuUI();
       localStorage.removeItem(STORAGE_KEY);
       renderPreview();
       showToast('Formulir dikosongkan');
@@ -2926,6 +2966,7 @@
           toggleExpSection(7);
           updateNPWPBadge();
           syncSubklasifikasiUI();
+          syncNIBBerlakuUI(true);
           saveData();
           renderPreview();
           showToast('Data berhasil dimuat');
@@ -3123,7 +3164,7 @@
           <div class="judul-ba">BERITA ACARA PEMBUKTIAN KUALIFIKASI</div>
           <div class="nomor-ba">Nomor: ${escapeHtml(d.Nomor_Kualifikasi)}</div>
           <p style="text-align:justify; margin:5px 0;">
-            Pada hari ini <strong>${escapeHtml(d.Hari)}</strong> tanggal <strong>${escapeHtml(d.Tanggal_Teks)}</strong> bulan <strong>${escapeHtml(d.Bulan)}</strong> tahun <strong>${escapeHtml(d.Tahun_Teks)}</strong>, secara luring yang bertempat di UPTD Metrologi Legal, Dinas Perindustrian dan Perdagangan Kab. Sidoarjo Jl. Lingkar Timur, Kel. Gebang Kec. Sidoarjo telah dilakukan pembuktian kualifikasi terhadap :
+            Pada hari ini <strong>${escapeHtml(d.Hari)}</strong> tanggal <strong>${escapeHtml(d.Tanggal_Teks)}</strong> bulan <strong>${escapeHtml(d.Bulan)}</strong> tahun <strong>${escapeHtml(d.Tahun_Teks)}</strong>, secara luring yang bertempat di ${escapeHtml(d.Alamat_BA)} telah dilakukan pembuktian kualifikasi terhadap :
           </p>
           ${identitasPenyedia}
           <p style="margin:5px 0;">Untuk <strong>${escapeHtml(d.Pekerjaan)}</strong> Pada Dinas Perindustrian dan Perdagangan Kab. Sidoarjo, dengan hasil berikut :</p>
@@ -3700,7 +3741,7 @@
           wRun(d.Bulan, { bold: true, sz: 20 }),
           wRun(' tahun ', { sz: 20 }),
           wRun(d.Tahun_Teks, { bold: true, sz: 20 }),
-          wRun(', secara luring yang bertempat di UPTD Metrologi Legal, Dinas Perindustrian dan Perdagangan Kab. Sidoarjo Jl. Lingkar Timur, Kel. Gebang Kec. Sidoarjo telah dilakukan pembuktian kualifikasi terhadap :', { sz: 20 })
+          wRun(`, secara luring yang bertempat di ${d.Alamat_BA} telah dilakukan pembuktian kualifikasi terhadap :`, { sz: 20 })
         ].join(''), { align: 'both', after: 40 })}
         ${wIdentitasPenyedia(d)}
         ${wPara([
