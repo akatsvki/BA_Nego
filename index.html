@@ -1000,24 +1000,21 @@
         <div class="grid-2">
           <div class="form-group">
             <label for="Kategori_Pengadaan">Kategori Pengadaan</label>
-            <input type="text" id="Kategori_Pengadaan" name="Kategori_Pengadaan" list="kategoriList" value="Jasa Konsultansi" />
-            <datalist id="kategoriList">
-              <option value="Jasa Konsultansi">
-              <option value="Pekerjaan Konstruksi">
-              <option value="Pengadaan Barang">
-              <option value="Jasa Lainnya">
-            </datalist>
+            <select id="Kategori_Pengadaan" name="Kategori_Pengadaan">
+              <option value="Barang">Barang</option>
+              <option value="Pekerjaan Konstruksi">Pekerjaan Konstruksi</option>
+              <option value="Jasa Konsultansi" selected>Jasa Konsultansi</option>
+              <option value="Jasa Lainnya">Jasa Lainnya</option>
+            </select>
           </div>
           <div class="form-group">
             <label for="Metode_Pengadaan">Metode Pengadaan</label>
-            <input type="text" id="Metode_Pengadaan" name="Metode_Pengadaan" list="metodeList" value="Pengadaan Langsung" />
-            <datalist id="metodeList">
-              <option value="Pengadaan Langsung">
-              <option value="E-Purchasing">
-              <option value="Penunjukan Langsung">
-              <option value="Tender Cepat">
-              <option value="Seleksi">
-            </datalist>
+            <select id="Metode_Pengadaan" name="Metode_Pengadaan">
+              <option value="E-purchasing">E-purchasing</option>
+              <option value="Pengadaan Langsung" selected>Pengadaan Langsung</option>
+              <option value="Penunjukan Langsung">Penunjukan Langsung</option>
+              <option value="Seleksi">Seleksi</option>
+            </select>
           </div>
           <div class="form-group span-2">
             <label for="Pekerjaan">Nama Paket Pekerjaan <span class="tag-hint">&lt;&lt;Pekerjaan&gt;&gt;</span></label>
@@ -2186,6 +2183,41 @@
       if (currentStep === 5) renderPreview();
     }
 
+    // Pilihan metode mengikuti kategori pengadaan pada panduan pengguna.
+    // Peta pilihan ditanam langsung agar dropdown dapat digunakan saat offline.
+    const METODE_BY_KATEGORI = {
+      'Barang': ['E-purchasing', 'Pengadaan Langsung', 'Penunjukan Langsung', 'Tender Cepat', 'Tender'],
+      'Pekerjaan Konstruksi': ['E-purchasing', 'Pengadaan Langsung', 'Penunjukan Langsung', 'Tender Cepat', 'Tender'],
+      'Jasa Konsultansi': ['E-purchasing', 'Pengadaan Langsung', 'Penunjukan Langsung', 'Seleksi'],
+      'Jasa Lainnya': ['E-purchasing', 'Pengadaan Langsung', 'Penunjukan Langsung', 'Tender Cepat', 'Tender']
+    };
+
+    function normalizeKategoriPengadaan(value) {
+      const kategori = String(value || '').trim();
+      if (kategori === 'Pengadaan Barang') return 'Barang'; // kompatibilitas data versi sebelumnya
+      return Object.prototype.hasOwnProperty.call(METODE_BY_KATEGORI, kategori)
+        ? kategori : 'Jasa Konsultansi';
+    }
+
+    function normalizeMetodePengadaan(value) {
+      const metode = String(value || '').trim();
+      return /^e-purchasing$/i.test(metode) ? 'E-purchasing' : metode;
+    }
+
+    function syncMetodePengadaan(preferredMetode) {
+      const kategoriEl = document.getElementById('Kategori_Pengadaan');
+      const metodeEl = document.getElementById('Metode_Pengadaan');
+      if (!kategoriEl || !metodeEl) return;
+      const kategori = normalizeKategoriPengadaan(kategoriEl.value);
+      kategoriEl.value = kategori;
+      const pilihan = METODE_BY_KATEGORI[kategori];
+      const kandidat = normalizeMetodePengadaan(
+        preferredMetode === undefined ? metodeEl.value : preferredMetode
+      );
+      metodeEl.replaceChildren(...pilihan.map(metode => new Option(metode, metode)));
+      metodeEl.value = pilihan.includes(kandidat) ? kandidat : 'Pengadaan Langsung';
+    }
+
     const SCALAR_FIELDS = [
       'pickerTanggalBA_text', 'Tanggal', 'Hari', 'Tanggal_Teks', 'Bulan', 'Tahun_Teks', 'Tahun',
       'No_Permohonan', 'Tanggal_permohonan', 'Tanggal_Mulai', 'Tanggal_Selesai',
@@ -2214,6 +2246,7 @@
     window.addEventListener('DOMContentLoaded', () => {
       initIndoCalendarControls();
       initSubklasifikasiOptions();
+      syncMetodePengadaan();
       loadSavedData();
       finishSubklasifikasiInput();
       updateNPWPBadge();
@@ -2240,6 +2273,9 @@
           }
           if (el.id === 'SubKlasifikasi') {
             syncSubklasifikasiUI();
+          }
+          if (el.id === 'Kategori_Pengadaan') {
+            syncMetodePengadaan();
           }
           if (el.classList.contains('npwp-input')) {
             handleNPWPInput(el);
@@ -2817,6 +2853,7 @@
         const parsed = JSON.parse(raw);
         if (parsed.scalars) {
           SCALAR_FIELDS.forEach(key => {
+            if (key === 'Kategori_Pengadaan' || key === 'Metode_Pengadaan') return;
             const el = document.getElementById(key);
             if (el && parsed.scalars[key] !== undefined) {
               el.value = key === 'NPWP' ? formatNPWP(parsed.scalars[key]) :
@@ -2824,6 +2861,8 @@
                   key === 'SubKlasifikasi' ? formatSubklasifikasi(parsed.scalars[key]) : parsed.scalars[key];
             }
           });
+          document.getElementById('Kategori_Pengadaan').value = normalizeKategoriPengadaan(parsed.scalars.Kategori_Pengadaan);
+          syncMetodePengadaan(parsed.scalars.Metode_Pengadaan);
         }
         if (Array.isArray(parsed.personelList) && parsed.personelList.length > 0) {
           personelList = parsed.personelList;
@@ -2837,7 +2876,7 @@
       if (!confirm('Hapus semua isian formulir saat ini?')) return;
       document.getElementById('baForm').reset();
       document.getElementById('Kategori_Pengadaan').value = 'Jasa Konsultansi';
-      document.getElementById('Metode_Pengadaan').value = 'Pengadaan Langsung';
+      syncMetodePengadaan('Pengadaan Langsung');
       personelList = [
         { kategori: 'Team Leader', nama: '', pendidikan: '', skk: '', status: 'auto' },
         { kategori: 'Teknisi Ahli K3', nama: '', pendidikan: '', skk: '', status: 'auto' }
@@ -2868,6 +2907,7 @@
           const parsed = JSON.parse(e.target.result);
           if (parsed.scalars) {
             SCALAR_FIELDS.forEach(key => {
+              if (key === 'Kategori_Pengadaan' || key === 'Metode_Pengadaan') return;
               const el = document.getElementById(key);
               if (el && parsed.scalars[key] !== undefined) {
                 el.value = key === 'NPWP' ? formatNPWP(parsed.scalars[key]) :
@@ -2875,6 +2915,8 @@
                   key === 'SubKlasifikasi' ? formatSubklasifikasi(parsed.scalars[key]) : parsed.scalars[key];
               }
             });
+            document.getElementById('Kategori_Pengadaan').value = normalizeKategoriPengadaan(parsed.scalars.Kategori_Pengadaan);
+            syncMetodePengadaan(parsed.scalars.Metode_Pengadaan);
           }
           if (Array.isArray(parsed.personelList) && parsed.personelList.length > 0) {
             personelList = parsed.personelList;
