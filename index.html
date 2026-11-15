@@ -669,7 +669,8 @@
 
     .doc-page {
       background: #fff;
-      padding: 13mm 17mm;
+      /* Margin dokumen: atas/bawah 1 cm dan kiri/kanan 1,2 cm. */
+      padding: 10mm 12mm;
       margin-bottom: 14px;
       box-shadow: 0 2px 10px rgba(0,0,0,0.18);
       box-sizing: border-box;
@@ -777,6 +778,21 @@
       user-select: none;
     }
 
+    /* Paragraf penutup dan semua tanda tangan harus berada di halaman yang sama.
+       Berlaku untuk ekspor PDF html2pdf.js maupun cetak/Simpan sebagai PDF. */
+    .ba-closing-block {
+      display: flow-root;
+      break-inside: avoid !important;
+      page-break-inside: avoid !important;
+      -webkit-column-break-inside: avoid !important;
+    }
+    .ba-closing-block .ttd-table,
+    .ba-closing-block .ttd-table tr,
+    .ba-closing-block .ttd-table td {
+      break-inside: avoid !important;
+      page-break-inside: avoid !important;
+    }
+
     .toast {
       position: fixed;
       top: 72px;
@@ -802,7 +818,7 @@
     @media print {
       @page {
         size: A4 portrait;
-        margin: 0;
+        margin: 10mm 12mm;
       }
       body {
         background: #fff !important;
@@ -826,7 +842,8 @@
       }
       .doc-page {
         margin: 0 !important;
-        padding: 12mm 16mm !important;
+        /* Saat cetak, margin sudah disediakan oleh @page agar tidak dobel. */
+        padding: 0 !important;
         box-shadow: none !important;
         page-break-after: always;
         break-after: page;
@@ -961,6 +978,18 @@
             <input type="text" id="Nomor_Laporan" name="Nomor_Laporan" placeholder="027/.../438.5.14/2026" />
           </div>
         </div>
+
+        <div class="section-divider">Pejabat Pengadaan (Penandatangan)</div>
+        <div class="grid-2">
+          <div class="form-group">
+            <label for="Nama_Pejabat_Pengadaan">Nama Pejabat Pengadaan</label>
+            <input type="text" id="Nama_Pejabat_Pengadaan" name="Nama_Pejabat_Pengadaan" value="ADIB NUR IKHWAN, S.T." placeholder="Nama lengkap dan gelar" />
+          </div>
+          <div class="form-group">
+            <label for="NIP_Pejabat_Pengadaan">NIP Pejabat Pengadaan</label>
+            <input type="text" id="NIP_Pejabat_Pengadaan" name="NIP_Pejabat_Pengadaan" value="199102072014031001" inputmode="numeric" placeholder="18 digit NIP" />
+          </div>
+        </div>
       </section>
 
       <!-- STEP 2: PAKET PEKERJAAN & BIAYA -->
@@ -1000,23 +1029,23 @@
           </div>
           <div class="form-group">
             <label for="Pagu">Pagu Anggaran (Rp) <span class="tag-hint">&lt;&lt;Pagu&gt;&gt;</span></label>
-            <input type="text" id="Pagu" name="Pagu" class="currency-input" inputmode="numeric" placeholder="50.000.000" />
+            <input type="text" id="Pagu" name="Pagu" class="currency-input decimal-currency-input" inputmode="decimal" placeholder="50.000.000,00" />
           </div>
           <div class="form-group">
             <label for="HPS">Nilai HPS (Rp) <span class="tag-hint">&lt;&lt;HPS&gt;&gt;</span></label>
-            <input type="text" id="HPS" name="HPS" class="currency-input" inputmode="numeric" placeholder="49.500.000" />
+            <input type="text" id="HPS" name="HPS" class="currency-input decimal-currency-input" inputmode="decimal" placeholder="49.500.000,00" />
           </div>
           <div class="form-group">
             <label for="Harga_Penawaran">Harga Penawaran (Rp) <span class="tag-hint">&lt;&lt;Harga_Penawaran&gt;&gt;</span></label>
-            <input type="text" id="Harga_Penawaran" name="Harga_Penawaran" class="currency-input" inputmode="numeric" placeholder="49.000.000" />
+            <input type="text" id="Harga_Penawaran" name="Harga_Penawaran" class="currency-input decimal-currency-input" inputmode="decimal" placeholder="49.000.000,00" />
           </div>
           <div class="form-group">
             <label for="Harga_Terkoreksi">Harga Terkoreksi (Rp) <span class="tag-hint">&lt;&lt;Harga_Terkoreksi&gt;&gt;</span></label>
-            <input type="text" id="Harga_Terkoreksi" name="Harga_Terkoreksi" class="currency-input" inputmode="numeric" placeholder="49.000.000" />
+            <input type="text" id="Harga_Terkoreksi" name="Harga_Terkoreksi" class="currency-input decimal-currency-input" inputmode="decimal" placeholder="49.000.000,00" />
           </div>
           <div class="form-group">
             <label for="Harga_Nego">Harga Negosiasi (Rp) <span class="tag-hint">&lt;&lt;Harga_Nego&gt;&gt;</span></label>
-            <input type="text" id="Harga_Nego" name="Harga_Nego" class="currency-input" inputmode="numeric" placeholder="48.500.000" />
+            <input type="text" id="Harga_Nego" name="Harga_Nego" class="currency-input decimal-currency-input" inputmode="decimal" placeholder="48.500.000,00" />
           </div>
         </div>
       </section>
@@ -1119,9 +1148,16 @@
             <label for="Kualifikasi">Kualifikasi <span class="tag-hint">&lt;&lt;Kualifikasi&gt;&gt;</span></label>
             <input type="text" id="Kualifikasi" name="Kualifikasi" placeholder="Contoh: Kecil" />
           </div>
-          <div class="form-group">
+          <div class="form-group span-2">
             <label for="SubKlasifikasi">SubKlasifikasi <span class="tag-hint">&lt;&lt;SubKlasifikasi&gt;&gt;</span></label>
-            <input type="text" id="SubKlasifikasi" name="SubKlasifikasi" placeholder="Contoh: RK001 / BG001..." />
+            <div class="grid-2" style="gap:8px;">
+              <input type="text" id="SubKlasifikasi" name="SubKlasifikasi" list="subklasifikasiDatalist" autocomplete="off" placeholder="Ketik kode, contoh: RK002" aria-describedby="subklasifikasiInfo" />
+              <select id="subklasifikasiDropdown" aria-label="Pilih kode Subklasifikasi dari daftar">
+                <option value="">-- Pilih kode dari daftar --</option>
+              </select>
+            </div>
+            <datalist id="subklasifikasiDatalist"></datalist>
+            <small id="subklasifikasiInfo" aria-live="polite" style="color:var(--muted);font-size:0.76rem;">Ketik kode atau pilih dari daftar. Hasil: Kode (Judul KBLI).</small>
           </div>
           <div class="form-group span-2">
             <div class="status-row-bar" style="margin-top:0; border-top:none; padding-top:0;">
@@ -1214,7 +1250,7 @@
           </div>
           <div class="form-group">
             <label for="Nilai_Kontrak">Nilai Kontrak (Rp) <span class="tag-hint">&lt;&lt;Nilai_Kontrak&gt;&gt;</span></label>
-            <input type="text" id="Nilai_Kontrak" name="Nilai_Kontrak" class="currency-input" inputmode="numeric" />
+            <input type="text" id="Nilai_Kontrak" name="Nilai_Kontrak" class="currency-input decimal-currency-input" inputmode="decimal" placeholder="0,00" />
           </div>
           <div class="form-group">
             <label for="No_Pembayaran_BAST">No Bukti Pembayaran/BAST <span class="tag-hint">&lt;&lt;No_Pembayaran_BAST&gt;&gt;</span></label>
@@ -1271,7 +1307,7 @@
             </div>
             <div class="form-group">
               <label for="p6_Nilai_Kontrak">Nilai kontrak (Rp)</label>
-              <input type="text" id="p6_Nilai_Kontrak" name="p6_Nilai_Kontrak" class="currency-input" inputmode="numeric" />
+              <input type="text" id="p6_Nilai_Kontrak" name="p6_Nilai_Kontrak" class="currency-input decimal-currency-input" inputmode="decimal" placeholder="0,00" />
             </div>
             <div class="form-group">
               <label for="p6_No_Pembayaran_BAST">No Bukti pembayaran/BAST</label>
@@ -1327,7 +1363,7 @@
             </div>
             <div class="form-group">
               <label for="p7_Nilai_Kontrak">Nilai kontrak (Rp)</label>
-              <input type="text" id="p7_Nilai_Kontrak" name="p7_Nilai_Kontrak" class="currency-input" inputmode="numeric" />
+              <input type="text" id="p7_Nilai_Kontrak" name="p7_Nilai_Kontrak" class="currency-input decimal-currency-input" inputmode="decimal" placeholder="0,00" />
             </div>
             <div class="form-group">
               <label for="p7_No_Pembayaran_BAST">No Bukti pembayaran/BAST</label>
@@ -1416,10 +1452,745 @@
     ];
     const NAMA_HARI = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
 
+
+    // Daftar subklasifikasi dari PDF "Daftar Subklasifikasi Konstruksi Lengkap" (130 kode unik).
+    // Semua data ditanam di HTML agar pencarian/pemilihan tetap berjalan saat offline.
+    const SUBKLASIFIKASI_DATA = [
+      [
+            "AR001",
+            "Jasa Arsitektural Bangunan Gedung Hunian dan Non Hunian",
+            "71101"
+      ],
+      [
+            "AR002",
+            "Jasa Arsitektural Lainnya",
+            "71101"
+      ],
+      [
+            "AR003",
+            "Jasa desain interior pada bangunan gedung dan bangunan sipil",
+            "74120"
+      ],
+      [
+            "RK001",
+            "Jasa Rekayasa Konstruksi Bangunan Gedung Hunian dan Non hunian",
+            "71102"
+      ],
+      [
+            "RK002",
+            "Jasa Rekayasa Pekerjaan Teknik Sipil Sumber Daya Air",
+            "71102"
+      ],
+      [
+            "RK003",
+            "Jasa Rekayasa Pekerjaan Teknik Sipil Transportasi",
+            "71102"
+      ],
+      [
+            "RK004",
+            "Jasa Rekayasa Pekerjaan Mekanikal Dalam Bangunan",
+            "71102"
+      ],
+      [
+            "RK005",
+            "Jasa Rekayasa Lainnya",
+            "71102"
+      ],
+      [
+            "RT001",
+            "Jasa Pelayanan Studi Investasi Infrastruktur",
+            "70209"
+      ],
+      [
+            "RT002",
+            "Jasa Rekayasa Konstruksi Pembangkit, Jaringan Transmisi, Gardu Induk, dan Distribusi Tenaga Listrik",
+            "71102"
+      ],
+      [
+            "RT003",
+            "Jasa Rekayasa Proses Industrial, Produksi, dan Fasilitas Produksi",
+            "71102"
+      ],
+      [
+            "AL001",
+            "Jasa Pengembangan Pemanfaatan Ruang",
+            "71101"
+      ],
+      [
+            "AL002",
+            "Jasa Pengembangan Wilayah",
+            "71101"
+      ],
+      [
+            "AL003",
+            "Jasa Pengembangan Perkotaan",
+            "71101"
+      ],
+      [
+            "AL004",
+            "Jasa Pengembangan Lingkungan Bangunan dan Lanskap",
+            "71101"
+      ],
+      [
+            "IT001",
+            "Jasa Pembuatan Prospektus Geologi dan Geofisika",
+            "71102"
+      ],
+      [
+            "IT002",
+            "Jasa Konsultansi Ilmiah dan Teknis Bawah Tanah",
+            "71102"
+      ],
+      [
+            "IT003",
+            "Jasa Konsultansi Ilmiah dan Teknis Permukaan Tanah dan Pembuatan Peta",
+            "71102"
+      ],
+      [
+            "IT004",
+            "Jasa Konsultasi Ilmiah dan Teknis Prasarana dan Sarana Umum",
+            "71102"
+      ],
+      [
+            "IT005",
+            "Jasa Konsultansi Ilmiah dan Teknis Konstruksi Sistem Kendali Lalu Lintas",
+            "71102"
+      ],
+      [
+            "IT006",
+            "Jasa Konsultansi Ilmiah dan Teknis Konstruksi Sistem Kendali Lalu Lintas",
+            "71102"
+      ],
+      [
+            "IT007",
+            "Jasa Konsultansi Ilmiah dan Teknis Hidrolika, Hidrologi dan Oceanography",
+            "71102"
+      ],
+      [
+            "IT008",
+            "Jasa Konsultansi Ilmiah dan Teknis Hidrolika, Hidrologi dan Oceanography",
+            "71102"
+      ],
+      [
+            "AT001",
+            "Jasa Pengujian dan Analisis Teknis Geologi, Geofisika dan Geokimia",
+            "71102"
+      ],
+      [
+            "AT002",
+            "Jasa Pengujian dan Analisis Teknis Komposisi dan Tingkat Kemurnian",
+            "71102"
+      ],
+      [
+            "AT003",
+            "Jasa Pengujian Hasil Pekerjaan Konstruksi dan Fasilitas Laboratorium",
+            "71102"
+      ],
+      [
+            "AT004",
+            "Jasa Pengujian dan Analisis Teknis Parameter Fisikal",
+            "71202"
+      ],
+      [
+            "AT005",
+            "Jasa Pengujian dan Analisis Teknis Hidrolika, Hidrologi dan Oceanography",
+            "71102"
+      ],
+      [
+            "AT006",
+            "Jasa Pengujian dan Analisis Akustik dan vibrator Gedung Hunian dan Nonhunian",
+            "71202"
+      ],
+      [
+            "AT007",
+            "Jasa Commissioning Proses Industrial",
+            "71206"
+      ],
+      [
+            "BG001",
+            "Konstruksi Gedung Hunian",
+            "41011"
+      ],
+      [
+            "BG002",
+            "Konstruksi Gedung Perkantoran",
+            "41012"
+      ],
+      [
+            "BG003",
+            "Konstruksi Gedung Industri",
+            "41013"
+      ],
+      [
+            "BG004",
+            "Konstruksi Gedung Perbelanjaan",
+            "41014"
+      ],
+      [
+            "BG005",
+            "Konstruksi Gedung Kesehatan",
+            "41015"
+      ],
+      [
+            "BG006",
+            "Konstruksi Gedung Pendidikan",
+            "41016"
+      ],
+      [
+            "BG007",
+            "Konstruksi Gedung Penginapan",
+            "41017"
+      ],
+      [
+            "BG008",
+            "Konstruksi Gedung Tempat Hiburan dan Olahraga",
+            "41018"
+      ],
+      [
+            "BG009",
+            "Konstruksi Gedung Lainnya",
+            "41019"
+      ],
+      [
+            "BS001",
+            "Bangunan Sipil Jalan",
+            "42101"
+      ],
+      [
+            "BS002",
+            "Bangunan Sipil Jembatan, Jalan Layang, Fly Over, dan Underpass",
+            "42102"
+      ],
+      [
+            "BS003",
+            "Konstruksi Jalan Rel",
+            "42103"
+      ],
+      [
+            "BS004",
+            "Konstruksi Jaringan Irigasi dan Drainase",
+            "42201"
+      ],
+      [
+            "BS005",
+            "Konstruksi Bangunan Sipil Pengolahan Air Bersih",
+            "42202"
+      ],
+      [
+            "BS006",
+            "Konstruksi Bangunan Prasarana dan Sarana Sistem Pengolahan Limbah Padat, Cair, dan Gas",
+            "42203"
+      ],
+      [
+            "BS007",
+            "Konstruksi Bangunan Sipil Elektrikal",
+            "42204"
+      ],
+      [
+            "BS008",
+            "Konstruksi Bangunan Sipil Telekomunikasi untuk Prasarana Transportasi",
+            "42205"
+      ],
+      [
+            "BS009",
+            "Konstruksi Sentral Telekomunikasi",
+            "42206"
+      ],
+      [
+            "BS010",
+            "Konstruksi Bangunan Prasarana Sumber Daya Air",
+            "42911"
+      ],
+      [
+            "BS011",
+            "Konstruksi Bangunan Pelabuhan Bukan Perikanan",
+            "42912"
+      ],
+      [
+            "BS012",
+            "Konstruksi Bangunan Pelabuhan Perikanan",
+            "42913"
+      ],
+      [
+            "BS013",
+            "Konstruksi Bangunan Sipil Minyak dan Gas Bumi",
+            "42915"
+      ],
+      [
+            "BS014",
+            "Konstruksi Bangunan Sipil Pertambangan",
+            "42916"
+      ],
+      [
+            "BS015",
+            "Konstruksi Bangunan Sipil Panas Bumi",
+            "42917"
+      ],
+      [
+            "BS016",
+            "Konstruksi Bangunan Sipil Fasilitas Olah",
+            "42918"
+      ],
+      [
+            "BS017",
+            "Konstruksi Bangunan Sipil Lainnya Ytdl",
+            "42919"
+      ],
+      [
+            "BS018",
+            "Konstruksi Bangunan Sipil Fasilitas Pengolahan Produk Kimia, Petrokimia, Farmasi, dan Industri Lainnya",
+            "42923"
+      ],
+      [
+            "BS019",
+            "Konstruksi Bangunan Sipil Fasilitas Militer dan Peluncuran Satelit",
+            "42924"
+      ],
+      [
+            "BS020",
+            "Konstruksi Jaringan Irigasi, Komunikasi, dan Limbah Lainnya",
+            "42209"
+      ],
+      [
+            "PL001",
+            "Pembongkaran Bangunan",
+            "43110"
+      ],
+      [
+            "PL002",
+            "Pengerukan",
+            "42914"
+      ],
+      [
+            "PL003",
+            "Penyiapan Lahan Konstruksi",
+            "43120"
+      ],
+      [
+            "PL004",
+            "Pekerjaan Tanah",
+            "43120"
+      ],
+      [
+            "PL005",
+            "Pembuatan/Pengeboran Sumur Air Tanah",
+            "42207"
+      ],
+      [
+            "PL006",
+            "Pelaksanaan Pekerjaan Utilitas",
+            "43120"
+      ],
+      [
+            "PL007",
+            "Survei Penyelidikan Lapangan",
+            "43120"
+      ],
+      [
+            "PL008",
+            "Pemasangan Perancah (Steiger)",
+            "43902"
+      ],
+      [
+            "KK001",
+            "Pondasi Konstruksi",
+            "43901"
+      ],
+      [
+            "KK002",
+            "Konstruksi Reservoir Pembangkit Listrik Tenaga Air",
+            "42921"
+      ],
+      [
+            "KK003",
+            "Konstruksi Intake, Control Gate, Penstock dan Outflow Pembangkit Listrik Tenaga Air",
+            "42921"
+      ],
+      [
+            "KK004",
+            "Konstruksi Pelindung Pantai",
+            "42922"
+      ],
+      [
+            "KK005",
+            "Pekerjaan Lapis Perkerasan Beton (Rigid Pavement)",
+            "43909"
+      ],
+      [
+            "KK006",
+            "Pekerjaan Konstruksi Kedap Air, Minyak, dan Gas",
+            "43909"
+      ],
+      [
+            "KK007",
+            "Pekerjaan Konstruksi Kedap Suara",
+            "43302"
+      ],
+      [
+            "KK008",
+            "Perkerasan Aspal",
+            "43909"
+      ],
+      [
+            "KK009",
+            "Perkerasan Berbutir",
+            "43909"
+      ],
+      [
+            "KK010",
+            "Pengeboran dan Injeksi Semen Bertekanan (Drilling and Grouting)",
+            "43909"
+      ],
+      [
+            "KK011",
+            "Pemasangan Rangka dan Atap/Roofcovering",
+            "43903"
+      ],
+      [
+            "KK012",
+            "Pekerjaan Struktur Beton",
+            "43909"
+      ],
+      [
+            "KK013",
+            "Konstruksi Struktur Beton Pascatarik (Post Tensioned)",
+            "43909"
+      ],
+      [
+            "KK014",
+            "Konstruksi Terowongan",
+            "42104"
+      ],
+      [
+            "KK015",
+            "Pekerjaan Konstruksi Tahan Api (Tanur, Anneling, Flare, atau Incenerator)",
+            "43909"
+      ],
+      [
+            "KK016",
+            "Pemasangan Kerangka Baja",
+            "43904"
+      ],
+      [
+            "KP001",
+            "Pekerjaan Konstruksi Prapabrikasi Bangunan Gedung",
+            "41020"
+      ],
+      [
+            "KP002",
+            "Pekerjaan Konstruksi Prapabrikasi bangunan sipil",
+            "42930"
+      ],
+      [
+            "PA001",
+            "Penyewaan Peralatan Konstruksi",
+            "43905"
+      ],
+      [
+            "IN001",
+            "Instalasi Mekanikal",
+            "43291"
+      ],
+      [
+            "IN002",
+            "Instalasi Telekomunikasi",
+            "43212"
+      ],
+      [
+            "IN003",
+            "Instalasi Peralatan Infrastruktur Pertambangan dan Manufaktur",
+            "43299"
+      ],
+      [
+            "IN004",
+            "Instalasi Minyak dan Gas",
+            "43223"
+      ],
+      [
+            "IN005",
+            "Instalasi Konstruksi Navigasi Laut, Sungai dan Udara",
+            "43214"
+      ],
+      [
+            "IN006",
+            "Instalasi Elektronika",
+            "43213"
+      ],
+      [
+            "IN007",
+            "Instalasi saluran air (plambing)",
+            "43221"
+      ],
+      [
+            "IN008",
+            "Instalasi Pendingin Dan Ventilasi Udara",
+            "43224"
+      ],
+      [
+            "IN009",
+            "Instalasi Pendingin Dan Ventilasi Udara",
+            "43224"
+      ],
+      [
+            "IN010",
+            "Instalasi Pengolahan Air Untuk Pembangkit Listrik",
+            "43229"
+      ],
+      [
+            "IN011",
+            "Instalasi Sinyal Dan Rambu-rambu Jalan Raya",
+            "43216"
+      ],
+      [
+            "IN012",
+            "Instalasi Sinyal dan Telekomunikasi Kereta Api",
+            "43215"
+      ],
+      [
+            "IN013",
+            "Instalasi Pemanas dan Geotermal",
+            "43222"
+      ],
+      [
+            "IN014",
+            "Instalasi Meteorologi, Klimatologi dan Geofisika",
+            "43292"
+      ],
+      [
+            "PB001",
+            "Pengerjaan Pemasangan Kaca Dan Alumunium",
+            "43301"
+      ],
+      [
+            "PB002",
+            "Pengerjaan Pemasangan Kaca Dan Alumunium",
+            "43301"
+      ],
+      [
+            "PB003",
+            "Pengerjaan Lantai, Dinding, Peralatan Saniter Dan Plafon",
+            "43302"
+      ],
+      [
+            "PB004",
+            "Dekorasi Interior",
+            "43304"
+      ],
+      [
+            "PB005",
+            "Pemasangan Ornamen dan Pekerjaan Seni",
+            "43304"
+      ],
+      [
+            "PB006",
+            "Pemasangan Ornamen dan Pekerjaan Seni",
+            "43304"
+      ],
+      [
+            "PB007",
+            "Pengecatan",
+            "43303"
+      ],
+      [
+            "PB008",
+            "Pengecatan",
+            "43303"
+      ],
+      [
+            "PB009",
+            "Pembersihan dan Perapihan Bangunan Gedung dan/atau Bangunan Sipil",
+            "43309"
+      ],
+      [
+            "PB010",
+            "Pekerjaan Lanskap, Pertamanan, dan Penanaman Vegetasi",
+            "43305"
+      ],
+      [
+            "PB011",
+            "Pemulihan Lahan Pekerjaan Konstruksi",
+            "43909"
+      ],
+      [
+            "GT001",
+            "Bangunan Gedung Hunian",
+            "41011"
+      ],
+      [
+            "GT002",
+            "Konstruksi Gedung Hunian",
+            "41012"
+      ],
+      [
+            "GT003",
+            "Konstruksi Gedung Industri",
+            "41013"
+      ],
+      [
+            "GT004",
+            "Konstruksi Gedung Perbelanjaan",
+            "41014"
+      ],
+      [
+            "GT005",
+            "Konstruksi Gedung Kesehatan",
+            "41015"
+      ],
+      [
+            "GT006",
+            "Konstruksi Gedung Pendidikan",
+            "41016"
+      ],
+      [
+            "GT007",
+            "Konstruksi Gedung Penginapan",
+            "41017"
+      ],
+      [
+            "GT008",
+            "Konstruksi Gedung Tempat Hiburan dan Olahraga",
+            "41018"
+      ],
+      [
+            "ST001",
+            "Bangunan Sipil Jembatan, Jalan Layang, Fly Over, dan Underpass",
+            "42102"
+      ],
+      [
+            "ST002",
+            "Konstruksi Bangunan Sipil Pengolahan Air Bersih",
+            "42202"
+      ],
+      [
+            "ST003",
+            "Konstruksi Bangunan Sipil Elektrikal",
+            "42204"
+      ],
+      [
+            "ST004",
+            "Konstruksi Bangunan Prasarana Sumber Daya Air",
+            "42911"
+      ],
+      [
+            "ST005",
+            "Konstruksi Bangunan Pelabuhan Bukan Perikanan",
+            "42912"
+      ],
+      [
+            "ST006",
+            "Konstruksi Bangunan Sipil Minyak dan Gas Bumi",
+            "42915"
+      ],
+      [
+            "ST007",
+            "Konstruksi Bangunan Sipil Pertambangan",
+            "42916"
+      ],
+      [
+            "ST008",
+            "Konstruksi Bangunan Sipil Panas Bumi",
+            "42917"
+      ],
+      [
+            "ST009",
+            "Konstruksi Bangunan Sipil Fasilitas Olahraga",
+            "42918"
+      ],
+      [
+            "ST010",
+            "Konstruksi Bangunan Sipil Fasilitas Pengolahan Produk Kimia, Petrokimia, Farmasi, dan Industri Lainnya",
+            "42923"
+      ],
+      [
+            "ST011",
+            "Konstruksi Bangunan Sipil Fasilitas Militer dan Peluncuran Satelit",
+            "42924"
+      ]
+];
+    const SUBKLASIFIKASI_BY_CODE = Object.fromEntries(
+      SUBKLASIFIKASI_DATA.map(([kode, judul]) => [kode, judul])
+    );
+
+    // Menerima kode seperti RK002 maupun nilai lama berbentuk RK002 (Judul KBLI).
+    function kodeSubklasifikasi(value) {
+      const str = String(value ?? '').trim().toUpperCase();
+      const match = str.match(/^([A-Z]{2}\d{3})(?:\s*\(.*\))?$/);
+      return match && SUBKLASIFIKASI_BY_CODE[match[1]] ? match[1] : '';
+    }
+
+    function formatSubklasifikasi(value) {
+      const original = String(value ?? '').trim();
+      const kode = kodeSubklasifikasi(original);
+      return kode ? `${kode} (${SUBKLASIFIKASI_BY_CODE[kode]})` : original;
+    }
+
+    function initSubklasifikasiOptions() {
+      const datalist = document.getElementById('subklasifikasiDatalist');
+      const dropdown = document.getElementById('subklasifikasiDropdown');
+      if (!datalist || !dropdown) return;
+      let currentGroup = null;
+      let currentPrefix = '';
+      SUBKLASIFIKASI_DATA.forEach(([kode, judul]) => {
+        const suggestion = document.createElement('option');
+        suggestion.value = kode;
+        suggestion.label = `${kode} — ${judul}`;
+        datalist.appendChild(suggestion);
+
+        const prefix = kode.slice(0, 2);
+        if (prefix !== currentPrefix) {
+          currentGroup = document.createElement('optgroup');
+          currentGroup.label = `Kelompok ${prefix}`;
+          dropdown.appendChild(currentGroup);
+          currentPrefix = prefix;
+        }
+        const option = document.createElement('option');
+        option.value = kode;
+        option.textContent = `${kode} — ${judul}`;
+        currentGroup.appendChild(option);
+      });
+      dropdown.addEventListener('change', () => {
+        const input = document.getElementById('SubKlasifikasi');
+        input.value = formatSubklasifikasi(dropdown.value);
+        syncSubklasifikasiUI();
+        saveData();
+        if (currentStep === 5) renderPreview();
+      });
+    }
+
+    function syncSubklasifikasiUI() {
+      const input = document.getElementById('SubKlasifikasi');
+      const dropdown = document.getElementById('subklasifikasiDropdown');
+      const info = document.getElementById('subklasifikasiInfo');
+      if (!input || !dropdown || !info) return;
+      const raw = input.value.trim();
+      const kode = kodeSubklasifikasi(raw);
+      dropdown.value = kode || '';
+      if (kode) {
+        info.textContent = formatSubklasifikasi(kode);
+        info.style.color = 'var(--primary)';
+      } else if (/^[A-Z]{2}\d{3}$/i.test(raw)) {
+        info.textContent = 'Kode tidak ditemukan dalam daftar PDF. Periksa kembali kodenya.';
+        info.style.color = 'var(--danger)';
+      } else {
+        info.textContent = 'Ketik kode atau pilih dari daftar. Hasil: Kode (Judul KBLI).';
+        info.style.color = 'var(--muted)';
+      }
+    }
+
+    function finishSubklasifikasiInput() {
+      const input = document.getElementById('SubKlasifikasi');
+      if (!input) return;
+      input.value = formatSubklasifikasi(input.value);
+      syncSubklasifikasiUI();
+      saveData();
+      if (currentStep === 5) renderPreview();
+    }
+
     const SCALAR_FIELDS = [
       'pickerTanggalBA_text', 'Tanggal', 'Hari', 'Tanggal_Teks', 'Bulan', 'Tahun_Teks', 'Tahun',
       'No_Permohonan', 'Tanggal_permohonan', 'Tanggal_Mulai', 'Tanggal_Selesai',
       'Nomor_Klarifikasi', 'Nomor_Kualifikasi', 'Nomor_Negosiasi', 'Nomor_Laporan',
+      'Nama_Pejabat_Pengadaan', 'NIP_Pejabat_Pengadaan',
       'Kategori_Pengadaan', 'Metode_Pengadaan', 'Pekerjaan', 'Sumber_Dana',
       'Pagu', 'HPS', 'Harga_Penawaran', 'Harga_Terkoreksi', 'Harga_Nego',
       'Nama_Perusahaan', 'Nama_Direktur', 'Kuasa_Direktur', 'NPWP', 'Alamat',
@@ -1442,7 +2213,9 @@
 
     window.addEventListener('DOMContentLoaded', () => {
       initIndoCalendarControls();
+      initSubklasifikasiOptions();
       loadSavedData();
+      finishSubklasifikasiInput();
       updateNPWPBadge();
       renderPersonelForm();
       toggleExpSection(6);
@@ -1458,8 +2231,15 @@
 
         const eventName = el.tagName === 'SELECT' ? 'change' : 'input';
         el.addEventListener(eventName, (e) => {
-          if (el.classList.contains('currency-input')) {
+          if (el.classList.contains('decimal-currency-input')) {
+            // Tampilkan pemisah ribuan sambil mengetik; koma tetap bisa diketik.
+            formatRupiahDecimalInput(el);
+          } else if (el.classList.contains('currency-input')) {
+            // Input nominal kontrak lain tetap mengikuti perilaku versi sebelumnya.
             el.value = formatRupiah(el.value);
+          }
+          if (el.id === 'SubKlasifikasi') {
+            syncSubklasifikasiUI();
           }
           if (el.classList.contains('npwp-input')) {
             handleNPWPInput(el);
@@ -1471,6 +2251,35 @@
           if (currentStep === 5) renderPreview();
         });
 
+        if (el.classList.contains('decimal-currency-input')) {
+          // Ketika selesai mengetik, selalu tampilkan tepat 2 angka desimal.
+          el.addEventListener('blur', () => {
+            el.value = formatRupiahDecimal(el.value, true);
+            saveData();
+            if (currentStep === 5) renderPreview();
+          });
+          // Memudahkan mengganti ,00 dengan ,23 tanpa menghapus manual.
+          el.addEventListener('keydown', (e) => {
+            if (e.key === ',' || e.key === 'Decimal') {
+              const separator = el.value.indexOf(',');
+              if (separator !== -1) {
+                e.preventDefault();
+                el.setSelectionRange(separator + 1, el.value.length);
+              }
+            }
+          });
+        }
+
+        if (el.id === 'SubKlasifikasi') {
+          el.addEventListener('blur', finishSubklasifikasiInput);
+          el.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              finishSubklasifikasiInput();
+              el.blur();
+            }
+          });
+        }
         if (el.classList.contains('npwp-input')) {
           el.addEventListener('keydown', (e) => handleNPWPKeydown(el, e));
         }
@@ -1497,6 +2306,36 @@
     function formatRupiah(angka) {
       const clean = String(angka || '').replace(/\D/g, '');
       return clean.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    }
+
+    // Format 2 desimal untuk pagu, HPS, harga penawaran, terkoreksi, negosiasi,
+    // dan Nilai Kontrak (termasuk rincian pengalaman poin 6/7).
+    // Contoh: 2000000 -> 2.000.000,00; 2000000,23 -> 2.000.000,23.
+    function formatRupiahDecimal(value, final = false) {
+      const raw = String(value ?? '').trim();
+      if (!raw) return '';
+      const commaAt = raw.indexOf(',');
+      const integerPart = (commaAt === -1 ? raw : raw.slice(0, commaAt)).replace(/\D/g, '') || '0';
+      const decimalPart = commaAt === -1 ? '' : raw.slice(commaAt + 1).replace(/\D/g, '').slice(0, 2);
+      const rupiah = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+      if (final) return `${rupiah},${decimalPart.padEnd(2, '0')}`;
+      return commaAt === -1 ? rupiah : `${rupiah},${decimalPart}`;
+    }
+
+    // Pertahankan posisi kursor saat tanda titik ribuan bertambah/berkurang.
+    function formatRupiahDecimalInput(el) {
+      const raw = el.value;
+      const beforeCaret = raw.slice(0, el.selectionStart ?? raw.length);
+      const tokensBefore = (beforeCaret.match(/[0-9,]/g) || []).length;
+      const formatted = formatRupiahDecimal(raw, false);
+      el.value = formatted;
+      if (!formatted) return;
+      let pos = 0, tokens = 0;
+      while (pos < formatted.length && tokens < tokensBefore) {
+        if (/[0-9,]/.test(formatted[pos])) tokens++;
+        pos++;
+      }
+      el.setSelectionRange(pos, pos);
     }
 
     // Format otomatis NPWP 15 digit: XX.XXX.XXX.X-XXX.XXX
@@ -1957,7 +2796,8 @@
       const scalars = {};
       SCALAR_FIELDS.forEach(key => {
         const el = document.getElementById(key);
-        scalars[key] = el ? el.value.trim() : '';
+        const raw = el ? el.value.trim() : '';
+        scalars[key] = key === 'SubKlasifikasi' ? formatSubklasifikasi(raw) : raw;
       });
       return { scalars, personelList };
     }
@@ -1979,7 +2819,9 @@
           SCALAR_FIELDS.forEach(key => {
             const el = document.getElementById(key);
             if (el && parsed.scalars[key] !== undefined) {
-              el.value = key === 'NPWP' ? formatNPWP(parsed.scalars[key]) : parsed.scalars[key];
+              el.value = key === 'NPWP' ? formatNPWP(parsed.scalars[key]) :
+                  el.classList.contains('decimal-currency-input') ? formatRupiahDecimal(parsed.scalars[key], true) :
+                  key === 'SubKlasifikasi' ? formatSubklasifikasi(parsed.scalars[key]) : parsed.scalars[key];
             }
           });
         }
@@ -2004,6 +2846,7 @@
       toggleExpSection(6);
       toggleExpSection(7);
       updateNPWPBadge();
+      syncSubklasifikasiUI();
       localStorage.removeItem(STORAGE_KEY);
       renderPreview();
       showToast('Formulir dikosongkan');
@@ -2027,7 +2870,9 @@
             SCALAR_FIELDS.forEach(key => {
               const el = document.getElementById(key);
               if (el && parsed.scalars[key] !== undefined) {
-                el.value = key === 'NPWP' ? formatNPWP(parsed.scalars[key]) : parsed.scalars[key];
+                el.value = key === 'NPWP' ? formatNPWP(parsed.scalars[key]) :
+                  el.classList.contains('decimal-currency-input') ? formatRupiahDecimal(parsed.scalars[key], true) :
+                  key === 'SubKlasifikasi' ? formatSubklasifikasi(parsed.scalars[key]) : parsed.scalars[key];
               }
             });
           }
@@ -2038,6 +2883,7 @@
           toggleExpSection(6);
           toggleExpSection(7);
           updateNPWPBadge();
+          syncSubklasifikasiUI();
           saveData();
           renderPreview();
           showToast('Data berhasil dimuat');
@@ -2126,24 +2972,24 @@
     }
 
     function ttdHTML(d) {
-      // 5 baris kosong untuk tanda tangan agar tidak berdekatan
-      const limaBarisKosong = '<div class="ttd-spacer">&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;</div>';
+      // 4 baris kosong untuk tanda tangan (dikurangi 1 baris dari versi 8).
+      const empatBarisKosong = '<div class="ttd-spacer">&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;</div>';
       return `
         <table class="ttd-table">
           <tr>
             <td>
               Penyedia Barang/Jasa<br/>
               <strong>${escapeHtml(d.Nama_Perusahaan || '................................')}</strong>
-              ${limaBarisKosong}
+              ${empatBarisKosong}
               <strong><u>${escapeHtml(d.Kuasa_Direktur || '................................')}</u></strong>
             </td>
             <td>
               Pejabat Pengadaan<br/>
               Dinas Perindustrian dan Perdagangan<br/>
               Kabupaten Sidoarjo
-              <div class="ttd-spacer">&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;</div>
-              <strong><u>ADIB NUR IKHWAN, S.T.</u></strong><br/>
-              NIP. 199102072014031001
+              <div class="ttd-spacer">&nbsp;<br/>&nbsp;<br/>&nbsp;</div>
+              <strong><u>${escapeHtml(d.Nama_Pejabat_Pengadaan || 'ADIB NUR IKHWAN, S.T.')}</u></strong><br/>
+              NIP. ${escapeHtml(d.NIP_Pejabat_Pengadaan || '199102072014031001')}
             </td>
           </tr>
         </table>
@@ -2221,8 +3067,10 @@
             </tbody>
           </table>
           <p style="margin:6px 0;">Keterangan : Bahwa Tenaga Ahli yang disampaikan sampai dengan saat ini tidak terikat kontrak dipaket pekerjaan manapun.</p>
-          <p style="margin:6px 0;">Berita Acara ini dibuat dengan sesungguhnya untuk dipergunakan sebagaimana mestinya.</p>
-          ${ttdHTML(d)}
+          <div class="ba-closing-block">
+            <p style="margin:6px 0;">Berita Acara ini dibuat dengan sesungguhnya untuk dipergunakan sebagaimana mestinya.</p>
+            ${ttdHTML(d)}
+          </div>
         </div>
 
         <div class="html2pdf__page-break"></div>
@@ -2291,8 +3139,10 @@
               </tr>
             </tbody>
           </table>
-          <p style="margin:5px 0;">Berita Acara ini dibuat dengan sesungguhnya untuk dipergunakan sebagaimana mestinya.</p>
-          ${ttdHTML(d)}
+          <div class="ba-closing-block">
+            <p style="margin:5px 0;">Berita Acara ini dibuat dengan sesungguhnya untuk dipergunakan sebagaimana mestinya.</p>
+            ${ttdHTML(d)}
+          </div>
         </div>
 
         <div class="html2pdf__page-break"></div>
@@ -2312,8 +3162,10 @@
             <li>Negosiasi dilakukan adalah negosiasi teknis : -</li>
             <li>Penyedia harus membayar upah tenaga ahli sesuai dengan remunerasi sebagaimana diatur didalam KEPMEN no 33 tahun 2026</li>
           </ul>
-          <p>Berita Acara ini dibuat dengan sesungguhnya untuk dipergunakan sebagaimana mestinya.</p>
-          ${ttdHTML(d)}
+          <div class="ba-closing-block">
+            <p>Berita Acara ini dibuat dengan sesungguhnya untuk dipergunakan sebagaimana mestinya.</p>
+            ${ttdHTML(d)}
+          </div>
         </div>
 
         <div class="html2pdf__page-break"></div>
@@ -2364,6 +3216,7 @@
             <tr><td>Negosiasi Harga</td><td>:</td><td>Rp. ${escapeHtml(d.Harga_Nego)}</td></tr>
             <tr><td>Negosiasi Teknis</td><td>:</td><td>-</td></tr>
           </table>
+          <div class="ba-closing-block">
           <p style="margin:6px 0;">Adapun dokumen hasil pemilihan penyedia sebagaimana terlampir. Demikian untuk menjadikan periksa.</p>
           <table class="ttd-table" style="margin-top:22px;">
             <tr>
@@ -2371,15 +3224,16 @@
               <td>
                 Pejabat Pengadaan<br/>
                 Dinas Perindustrian dan Perdagangan Kab. Sidoarjo
-                <div class="ttd-spacer">&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;</div>
-                <strong><u>ADIB NUR IKHWAN, S.T.</u></strong><br/>
-                NIP. 199102072014031001
+                <div class="ttd-spacer">&nbsp;<br/>&nbsp;<br/>&nbsp;<br/>&nbsp;</div>
+                <strong><u>${escapeHtml(d.Nama_Pejabat_Pengadaan || 'ADIB NUR IKHWAN, S.T.')}</u></strong><br/>
+                NIP. ${escapeHtml(d.NIP_Pejabat_Pengadaan || '199102072014031001')}
               </td>
             </tr>
           </table>
           <div style="font-size:9.3pt; margin-top:6px;">
             Tembusan :<br/>
             - Yth. Kepala Dinas Perindustrian dan Perdagangan Kab. Sidoarjo (sebagai laporan)
+          </div>
           </div>
         </div>
       `;
@@ -2399,7 +3253,7 @@
           image: { type: 'jpeg', quality: 0.98 },
           html2canvas: { scale: 2, useCORS: true },
           jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-          pagebreak: { mode: ['css', 'legacy'] }
+          pagebreak: { mode: ['css', 'legacy'], avoid: ['.ba-closing-block'] }
         };
         html2pdf().set(opt).from(element).save();
       } else {
@@ -2540,7 +3394,8 @@
       const after = opts.after !== undefined ? opts.after : 40;
       const before = opts.before !== undefined ? opts.before : 0;
       const line = opts.line || 240;
-      return `<w:p><w:pPr><w:spacing w:before="${before}" w:after="${after}" w:line="${line}" w:lineRule="auto"/>${jc}</w:pPr>${runsXml}</w:p>`;
+      const keepNext = opts.keepNext ? '<w:keepNext/>' : '';
+      return `<w:p><w:pPr>${keepNext}<w:spacing w:before="${before}" w:after="${after}" w:line="${line}" w:lineRule="auto"/>${jc}</w:pPr>${runsXml}</w:p>`;
     }
 
     function wPageBreak() {
@@ -2551,7 +3406,7 @@
       return `
         <w:tbl>
           <w:tblPr>
-            <w:tblW w:w="9746" w:type="dxa"/>
+            <w:tblW w:w="10546" w:type="dxa"/>
             <w:tblBorders>
               <w:top w:val="none" w:sz="0" w:space="0" w:color="auto"/>
               <w:left w:val="none" w:sz="0" w:space="0" w:color="auto"/>
@@ -2564,7 +3419,7 @@
           </w:tblPr>
           <w:tblGrid>
             <w:gridCol w:w="2050"/>
-            <w:gridCol w:w="7696"/>
+            <w:gridCol w:w="8496"/>
           </w:tblGrid>
           <w:tr>
             <w:tc>
@@ -2601,7 +3456,7 @@
             </w:tc>
             <w:tc>
               <w:tcPr>
-                <w:tcW w:w="7696" w:type="dxa"/>
+                <w:tcW w:w="8496" w:type="dxa"/>
                 <w:tcBorders>
                   <w:bottom w:val="double" w:sz="12" w:space="0" w:color="000000"/>
                 </w:tcBorders>
@@ -2629,13 +3484,13 @@
         <w:tr>
           <w:tc><w:tcPr><w:tcW w:w="2100" w:type="dxa"/></w:tcPr>${wPara(wRun(lbl, { sz: 21 }), { after: 20 })}</w:tc>
           <w:tc><w:tcPr><w:tcW w:w="240" w:type="dxa"/></w:tcPr>${wPara(wRun(':', { sz: 21 }), { after: 20 })}</w:tc>
-          <w:tc><w:tcPr><w:tcW w:w="7406" w:type="dxa"/></w:tcPr>${wPara(wRun(val, { sz: 21 }), { after: 20 })}</w:tc>
+          <w:tc><w:tcPr><w:tcW w:w="8206" w:type="dxa"/></w:tcPr>${wPara(wRun(val, { sz: 21 }), { after: 20 })}</w:tc>
         </w:tr>
       `).join('');
       return `
         <w:tbl>
           <w:tblPr>
-            <w:tblW w:w="9746" w:type="dxa"/>
+            <w:tblW w:w="10546" w:type="dxa"/>
             <w:tblBorders>
               <w:top w:val="none"/><w:left w:val="none"/><w:bottom w:val="none"/><w:right w:val="none"/><w:insideH w:val="none"/><w:insideV w:val="none"/>
             </w:tblBorders>
@@ -2644,20 +3499,20 @@
             </w:tblCellMar>
             <w:tblLayout w:type="fixed"/>
           </w:tblPr>
-          <w:tblGrid><w:gridCol w:w="2100"/><w:gridCol w:w="240"/><w:gridCol w:w="7406"/></w:tblGrid>
+          <w:tblGrid><w:gridCol w:w="2100"/><w:gridCol w:w="240"/><w:gridCol w:w="8206"/></w:tblGrid>
           ${trs}
         </w:tbl>
       `;
     }
 
     function wTtdBlock(d, onlyRight = false) {
-      const empty5 = [1, 2, 3, 4, 5].map(() => wPara(wRun('', { sz: 21 }), { after: 0, line: 240 })).join('');
       const empty4 = [1, 2, 3, 4].map(() => wPara(wRun('', { sz: 21 }), { after: 0, line: 240 })).join('');
+      const empty3 = [1, 2, 3].map(() => wPara(wRun('', { sz: 21 }), { after: 0, line: 240 })).join('');
 
       const leftCell = onlyRight ? wPara(wRun('', { sz: 21 })) : `
         ${wPara(wRun('Penyedia Barang/Jasa', { sz: 21 }), { align: 'center', after: 10 })}
         ${wPara(wRun(d.Nama_Perusahaan || '................................', { bold: true, sz: 21 }), { align: 'center', after: 10 })}
-        ${empty5}
+        ${empty4}
         ${wPara(wRun(d.Kuasa_Direktur || '................................', { bold: true, underline: true, sz: 21 }), { align: 'center', after: 10 })}
       `;
 
@@ -2665,24 +3520,25 @@
         ${wPara(wRun('Pejabat Pengadaan', { sz: 21 }), { align: 'center', after: 10 })}
         ${wPara(wRun('Dinas Perindustrian dan Perdagangan', { sz: 21 }), { align: 'center', after: 10 })}
         ${wPara(wRun('Kabupaten Sidoarjo', { sz: 21 }), { align: 'center', after: 10 })}
-        ${empty4}
-        ${wPara(wRun('ADIB NUR IKHWAN, S.T.', { bold: true, underline: true, sz: 21 }), { align: 'center', after: 10 })}
-        ${wPara(wRun('NIP. 199102072014031001', { sz: 21 }), { align: 'center', after: 10 })}
+        ${empty3}
+        ${wPara(wRun(d.Nama_Pejabat_Pengadaan || 'ADIB NUR IKHWAN, S.T.', { bold: true, underline: true, sz: 21 }), { align: 'center', after: 10 })}
+        ${wPara(wRun('NIP. ' + (d.NIP_Pejabat_Pengadaan || '199102072014031001'), { sz: 21 }), { align: 'center', after: 10 })}
       `;
 
       return `
         <w:tbl>
           <w:tblPr>
-            <w:tblW w:w="9746" w:type="dxa"/>
+            <w:tblW w:w="10546" w:type="dxa"/>
             <w:tblBorders>
               <w:top w:val="none"/><w:left w:val="none"/><w:bottom w:val="none"/><w:right w:val="none"/><w:insideH w:val="none"/><w:insideV w:val="none"/>
             </w:tblBorders>
             <w:tblLayout w:type="fixed"/>
           </w:tblPr>
-          <w:tblGrid><w:gridCol w:w="4873"/><w:gridCol w:w="4873"/></w:tblGrid>
+          <w:tblGrid><w:gridCol w:w="5273"/><w:gridCol w:w="5273"/></w:tblGrid>
           <w:tr>
-            <w:tc><w:tcPr><w:tcW w:w="4873" w:type="dxa"/></w:tcPr>${leftCell}</w:tc>
-            <w:tc><w:tcPr><w:tcW w:w="4873" w:type="dxa"/></w:tcPr>${rightCell}</w:tc>
+            <w:trPr><w:cantSplit/></w:trPr>
+            <w:tc><w:tcPr><w:tcW w:w="5273" w:type="dxa"/></w:tcPr>${leftCell}</w:tc>
+            <w:tc><w:tcPr><w:tcW w:w="5273" w:type="dxa"/></w:tcPr>${rightCell}</w:tc>
           </w:tr>
         </w:tbl>
       `;
@@ -2764,7 +3620,7 @@
         ].join(''), { before: 60, after: 60 })}
         <w:tbl>
           <w:tblPr>
-            <w:tblW w:w="9746" w:type="dxa"/>
+            <w:tblW w:w="10546" w:type="dxa"/>
             <w:tblBorders>
               <w:top w:val="single" w:sz="6" w:space="0" w:color="000000"/>
               <w:left w:val="single" w:sz="6" w:space="0" w:color="000000"/>
@@ -2775,7 +3631,7 @@
             </w:tblBorders>
             <w:tblLayout w:type="fixed"/>
           </w:tblPr>
-          <w:tblGrid><w:gridCol w:w="620"/><w:gridCol w:w="6826"/><w:gridCol w:w="2300"/></w:tblGrid>
+          <w:tblGrid><w:gridCol w:w="620"/><w:gridCol w:w="7626"/><w:gridCol w:w="2300"/></w:tblGrid>
           <w:tr>
             ${wBorderedCell(620, wPara(wRun('No.', { bold: true, sz: 20 }), { align: 'center', after: 10 }), 'center')}
             ${wBorderedCell(6826, wPara(wRun('URAIAN', { bold: true, sz: 20 }), { align: 'center', after: 10 }), 'center')}
@@ -2784,7 +3640,7 @@
           ${klarifikasiRows}
         </w:tbl>
         ${wPara(wRun('Keterangan : Bahwa Tenaga Ahli yang disampaikan sampai dengan saat ini tidak terikat kontrak dipaket pekerjaan manapun.', { sz: 20 }), { before: 80, after: 40 })}
-        ${wPara(wRun('Berita Acara ini dibuat dengan sesungguhnya untuk dipergunakan sebagaimana mestinya.', { sz: 21 }), { before: 60, after: 360 })}
+        ${wPara(wRun('Berita Acara ini dibuat dengan sesungguhnya untuk dipergunakan sebagaimana mestinya.', { sz: 21 }), { before: 60, after: 360, keepNext: true })}
         ${wTtdBlock(d, false)}
       `;
 
@@ -2812,7 +3668,7 @@
         ].join(''), { before: 40, after: 40 })}
         <w:tbl>
           <w:tblPr>
-            <w:tblW w:w="9746" w:type="dxa"/>
+            <w:tblW w:w="10546" w:type="dxa"/>
             <w:tblBorders>
               <w:top w:val="single" w:sz="6" w:space="0" w:color="000000"/>
               <w:left w:val="single" w:sz="6" w:space="0" w:color="000000"/>
@@ -2823,7 +3679,7 @@
             </w:tblBorders>
             <w:tblLayout w:type="fixed"/>
           </w:tblPr>
-          <w:tblGrid><w:gridCol w:w="560"/><w:gridCol w:w="6886"/><w:gridCol w:w="2300"/></w:tblGrid>
+          <w:tblGrid><w:gridCol w:w="560"/><w:gridCol w:w="7686"/><w:gridCol w:w="2300"/></w:tblGrid>
           <w:tr>
             ${wBorderedCell(560, wPara(wRun('No.', { bold: true, sz: 19 }), { align: 'center', after: 10 }), 'center')}
             ${wBorderedCell(6886, wPara(wRun('URAIAN', { bold: true, sz: 19 }), { align: 'center', after: 10 }), 'center')}
@@ -2884,7 +3740,7 @@
             ${wBorderedCell(2300, wPara(statusWordXML(evalStates.p7), { align: 'center', after: 10 }), 'center')}
           </w:tr>
         </w:tbl>
-        ${wPara(wRun('Berita Acara ini dibuat dengan sesungguhnya untuk dipergunakan sebagaimana mestinya.', { sz: 20 }), { before: 80, after: 280 })}
+        ${wPara(wRun('Berita Acara ini dibuat dengan sesungguhnya untuk dipergunakan sebagaimana mestinya.', { sz: 20 }), { before: 80, after: 280, keepNext: true })}
         ${wTtdBlock(d, false)}
       `;
 
@@ -2916,7 +3772,7 @@
         ].join(''), { after: 40 })}
         ${wPara(wRun('-   Negosiasi dilakukan adalah negosiasi teknis : -', { sz: 21 }), { after: 40 })}
         ${wPara(wRun('-   Penyedia harus membayar upah tenaga ahli sesuai dengan remunerasi sebagaimana diatur didalam KEPMEN no 33 tahun 2026', { sz: 21 }), { after: 80 })}
-        ${wPara(wRun('Berita Acara ini dibuat dengan sesungguhnya untuk dipergunakan sebagaimana mestinya.', { sz: 21 }), { before: 60, after: 380 })}
+        ${wPara(wRun('Berita Acara ini dibuat dengan sesungguhnya untuk dipergunakan sebagaimana mestinya.', { sz: 21 }), { before: 60, after: 380, keepNext: true })}
         ${wTtdBlock(d, false)}
       `;
 
@@ -2949,7 +3805,7 @@
           <w:tr>
             <w:tc><w:tcPr><w:tcW w:w="2700" w:type="dxa"/></w:tcPr>${wPara(wRun(k, { sz: 20 }), { after: 15 })}</w:tc>
             <w:tc><w:tcPr><w:tcW w:w="240" w:type="dxa"/></w:tcPr>${wPara(wRun(':', { sz: 20 }), { after: 15 })}</w:tc>
-            <w:tc><w:tcPr><w:tcW w:w="6806" w:type="dxa"/></w:tcPr>${wPara(wRun(v, { sz: 20 }), { after: 15 })}</w:tc>
+            <w:tc><w:tcPr><w:tcW w:w="7606" w:type="dxa"/></w:tcPr>${wPara(wRun(v, { sz: 20 }), { after: 15 })}</w:tc>
           </w:tr>
         `).join('');
       }
@@ -2960,23 +3816,23 @@
         ${wPara('', { before: 0, after: 80, line: 120 })}
         <w:tbl>
           <w:tblPr>
-            <w:tblW w:w="9746" w:type="dxa"/>
+            <w:tblW w:w="10546" w:type="dxa"/>
             <w:tblBorders>
               <w:top w:val="none"/><w:left w:val="none"/><w:bottom w:val="none"/><w:right w:val="none"/><w:insideH w:val="none"/><w:insideV w:val="none"/>
             </w:tblBorders>
             <w:tblLayout w:type="fixed"/>
           </w:tblPr>
-          <w:tblGrid><w:gridCol w:w="5600"/><w:gridCol w:w="4146"/></w:tblGrid>
+          <w:tblGrid><w:gridCol w:w="6000"/><w:gridCol w:w="4546"/></w:tblGrid>
           <w:tr>
             <w:tc>
-              <w:tcPr><w:tcW w:w="5600" w:type="dxa"/></w:tcPr>
+              <w:tcPr><w:tcW w:w="6000" w:type="dxa"/></w:tcPr>
               ${wPara(wRun(`Nomor		: ${d.Nomor_Laporan}`, { sz: 20 }), { after: 15 })}
               ${wPara(wRun('Sifat		: Penting', { sz: 20 }), { after: 15 })}
               ${wPara(wRun('Lampiran	: 1 (satu) berkas', { sz: 20 }), { after: 15 })}
               ${wPara(wRun('Perihal		: Laporan Hasil Pelaksanaan Pengadaan Barang/Jasa', { sz: 20 }), { after: 15 })}
             </w:tc>
             <w:tc>
-              <w:tcPr><w:tcW w:w="4146" w:type="dxa"/></w:tcPr>
+              <w:tcPr><w:tcW w:w="4546" w:type="dxa"/></w:tcPr>
               ${wPara(wRun(`Sidoarjo, ${d.Tanggal}`, { sz: 20 }), { after: 40 })}
               ${wPara(wRun('Kepada', { sz: 20 }), { after: 10 })}
               ${wPara(wRun('Yth. Sdr. PPK Dinas Perindustrian dan Perdagangan Kab. Sidoarjo', { sz: 20 }), { after: 10 })}
@@ -2993,23 +3849,23 @@
         ].join(''), { align: 'both', before: 60, after: 40 })}
         ${wPara(wRun('Paket Pekerjaan :', { bold: true, sz: 20 }), { after: 20 })}
         <w:tbl>
-          <w:tblPr><w:tblW w:w="9746" w:type="dxa"/><w:tblBorders><w:top w:val="none"/><w:left w:val="none"/><w:bottom w:val="none"/><w:right w:val="none"/><w:insideH w:val="none"/><w:insideV w:val="none"/></w:tblBorders><w:tblLayout w:type="fixed"/></w:tblPr>
-          <w:tblGrid><w:gridCol w:w="2700"/><w:gridCol w:w="240"/><w:gridCol w:w="6806"/></w:tblGrid>
+          <w:tblPr><w:tblW w:w="10546" w:type="dxa"/><w:tblBorders><w:top w:val="none"/><w:left w:val="none"/><w:bottom w:val="none"/><w:right w:val="none"/><w:insideH w:val="none"/><w:insideV w:val="none"/></w:tblBorders><w:tblLayout w:type="fixed"/></w:tblPr>
+          <w:tblGrid><w:gridCol w:w="2700"/><w:gridCol w:w="240"/><w:gridCol w:w="7606"/></w:tblGrid>
           ${makeKeyValRows(lapRows)}
         </w:tbl>
         ${wPara(wRun('Pemilihan :', { bold: true, sz: 20 }), { before: 40, after: 20 })}
         <w:tbl>
-          <w:tblPr><w:tblW w:w="9746" w:type="dxa"/><w:tblBorders><w:top w:val="none"/><w:left w:val="none"/><w:bottom w:val="none"/><w:right w:val="none"/><w:insideH w:val="none"/><w:insideV w:val="none"/></w:tblBorders><w:tblLayout w:type="fixed"/></w:tblPr>
-          <w:tblGrid><w:gridCol w:w="2700"/><w:gridCol w:w="240"/><w:gridCol w:w="6806"/></w:tblGrid>
+          <w:tblPr><w:tblW w:w="10546" w:type="dxa"/><w:tblBorders><w:top w:val="none"/><w:left w:val="none"/><w:bottom w:val="none"/><w:right w:val="none"/><w:insideH w:val="none"/><w:insideV w:val="none"/></w:tblBorders><w:tblLayout w:type="fixed"/></w:tblPr>
+          <w:tblGrid><w:gridCol w:w="2700"/><w:gridCol w:w="240"/><w:gridCol w:w="7606"/></w:tblGrid>
           ${makeKeyValRows(pemRows)}
         </w:tbl>
         ${wPara(wRun('Dari hasil evaluasi didapatkan Penyedia sebagai berikut :', { bold: true, sz: 20 }), { before: 40, after: 20 })}
         <w:tbl>
-          <w:tblPr><w:tblW w:w="9746" w:type="dxa"/><w:tblBorders><w:top w:val="none"/><w:left w:val="none"/><w:bottom w:val="none"/><w:right w:val="none"/><w:insideH w:val="none"/><w:insideV w:val="none"/></w:tblBorders><w:tblLayout w:type="fixed"/></w:tblPr>
-          <w:tblGrid><w:gridCol w:w="2700"/><w:gridCol w:w="240"/><w:gridCol w:w="6806"/></w:tblGrid>
+          <w:tblPr><w:tblW w:w="10546" w:type="dxa"/><w:tblBorders><w:top w:val="none"/><w:left w:val="none"/><w:bottom w:val="none"/><w:right w:val="none"/><w:insideH w:val="none"/><w:insideV w:val="none"/></w:tblBorders><w:tblLayout w:type="fixed"/></w:tblPr>
+          <w:tblGrid><w:gridCol w:w="2700"/><w:gridCol w:w="240"/><w:gridCol w:w="7606"/></w:tblGrid>
           ${makeKeyValRows(evalRows)}
         </w:tbl>
-        ${wPara(wRun('Adapun dokumen hasil pemilihan penyedia sebagaimana terlampir. Demikian untuk menjadikan periksa.', { sz: 20 }), { before: 80, after: 300 })}
+        ${wPara(wRun('Adapun dokumen hasil pemilihan penyedia sebagaimana terlampir. Demikian untuk menjadikan periksa.', { sz: 20 }), { before: 80, after: 300, keepNext: true })}
         ${wTtdBlock(d, true)}
         ${wPara(wRun('Tembusan :', { sz: 19 }), { before: 40, after: 10 })}
         ${wPara(wRun('- Yth. Kepala Dinas Perindustrian dan Perdagangan Kab. Sidoarjo (sebagai laporan)', { sz: 19 }), { after: 10 })}
@@ -3028,7 +3884,7 @@
     ${doc4}
     <w:sectPr>
       <w:pgSz w:w="11906" w:h="16838"/>
-      <w:pgMar w:top="680" w:right="1080" w:bottom="680" w:left="1080" w:header="400" w:footer="400" w:gutter="0"/>
+      <w:pgMar w:top="567" w:right="680" w:bottom="567" w:left="680" w:header="400" w:footer="400" w:gutter="0"/>
     </w:sectPr>
   </w:body>
 </w:document>`;
